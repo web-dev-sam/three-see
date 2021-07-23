@@ -1,0 +1,30 @@
+{
+  "name": "three-see",
+  "version": "1.0.0",
+  "description": "A see scene rendered with threejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MindLaborDev/three-see.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MindLaborDev/three-see/issues"
+  },
+  "homepage": "https://github.com/MindLaborDev/three-see#readme",
+  "devDependencies": {
+    "webpack": "^5.46.0",
+    "webpack-cli": "^4.7.2",
+    "@babel/core": "^7.14.8",
+    "babel": "^6.23.0",
+    "babel-loader": "^8.2.2"
+  },
+  "dependencies": {
+    "three": "^0.130.1"
+  }
+}
