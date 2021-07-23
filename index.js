@@ -209,177 +209,244 @@ THREE.FilmShader = {
 };
 
 
-function loadSee() {
-    return new Promise(function (resolve, reject) {
+class See {
 
-        // Instantiate a loader
-        const loader = new THREE.GLTFLoader();
+    constructor() {
+        this.init();
+    }
 
-        // Load a glTF resource
-        loader.load(
-            'models/see.gltf',
-            resolve,
-            function (xhr) {
-                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-            },
-            function (error) {
-                reject(error);
+
+    async init() {
+        this.scene = new THREE.Scene();
+        this.clock = new THREE.Clock();
+        this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 40);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.see = await this.fetchSee('models/see.gltf');
+        this.time = 0;
+        this.frame = 0;
+
+        // Add scene to DOM
+        this.show();
+
+        // Add model to the scene
+        this.seeModel = this.see.scene.children[0];
+        this.scene.add(this.seeModel);
+
+        // Set camera position
+        // Setup lighting
+        // Replace some materials like the floor and octopus
+        // Add fog
+        // Add postprocessing (bloom)
+        this.setupCamera();
+        this.setupLighting();
+        this.addCustomizations();
+        this.addFog();
+        this.postprocessing();
+
+        // Render the scene
+        this.render();
+    }
+
+
+    /*
+    * Runs before the first frame is rendered
+    */
+    firstFrameSetup() {
+        this.octoOffset = this.octopus.position.y;
+        this.cameraOffset = this.camera.rotation.x;
+    }
+
+
+    /*
+    * Render a frame
+    */
+    render() {
+
+        if (this.frame === 0) {
+            this.firstFrameSetup();
+            this.frame++;
+        }
+
+        // Move camera
+        this.camera.rotation.x = this.cameraOffset + Math.sin(this.time / 1.5) * 0.02;
+        this.octopus.position.y = this.octoOffset + Math.sin(this.time / 2) / 6;
+
+        // Clear the scene and render it
+        this.renderer.autoClear = false;
+        this.renderer.clear();
+        const dT = this.clock.getDelta();
+        this.composer.render(dT);
+
+        // Keep track of time
+        this.time += dT;
+        this.frame++;
+
+        // Render again
+        requestAnimationFrame(() => this.render());
+    }
+
+
+    /*
+    * Setup postprossessing
+    */
+    postprocessing() {
+
+        // Setup shader passes and composer
+        const renderPass = new THREE.RenderPass(this.scene, this.camera);
+        const effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+        const bloomPass = new THREE.BloomPass(1.7, 15, 5.0, 32);
+        this.composer = new THREE.EffectComposer(this.renderer);
+        effectCopy.renderToScreen = true;
+
+        // Add bloom effect
+        this.composer.addPass(renderPass);
+        this.composer.addPass(bloomPass);
+        this.composer.addPass(effectCopy);
+    }
+
+
+    /*
+    * Adds fog to the scene
+    */
+    addFog() {
+
+        // Adding fog
+        const fogColor = new THREE.Color(0x160c84);
+        this.scene.background = fogColor;
+        this.scene.fog = new THREE.Fog(fogColor, -2, 19);
+    }
+
+
+    /*
+    * Replaces some materials like the floor and octopus
+    */
+    addCustomizations() {
+        const me = this;
+
+        let i = 0;
+        this.seeModel.traverse(n => {
+            if (n.isMesh) {
+
+                // Enable shadows
+                n.castShadow = true;
+                n.receiveShadow = true;
+
+                // Floor
+                if (i == 0) {
+                    me.floor = n;
+                    me.replaceFloor();
+                }
+
+                // Octupus
+                if (i == 527) {
+                    me.octopus = n;
+                    me.makeOctopusGlow();
+                }
+
+                // Hide sky box
+                if (i++ == 1) {
+                    n.visible = false;
+                    return;
+                }
+
+                // Add anisotropy
+                if (n.material.map)
+                    n.material.map.anisotropy = 16;
             }
-        );
-    });
+        });
+    }
+
+
+    /*
+    * Make floor sandy
+    */
+    replaceFloor() {
+        this.floor.material = new THREE.MeshPhongMaterial({
+            color: 0xC2B280,
+            specular: 0x050505,
+            shininess: 100
+        });
+    }
+
+
+    /*
+    * Make octopus glowy
+    */
+    makeOctopusGlow() {
+        this.octopus.material = new THREE.MeshLambertMaterial({
+            color: 0xFF0000,
+            emissive: 0xFF0000,
+            emissiveIntensity: 8
+        });
+    }
+
+
+    /*
+    * Setup lighting
+    */
+    setupLighting() {
+
+        // Add hemisphere light
+        this.hemisphereLight = new THREE.HemisphereLight(0xb1eeff, 0x080820, 4);
+        this.hemisphereLight.intensity = 0.1;
+        this.scene.add(this.hemisphereLight);
+
+        // Add backgroud spot light
+        this.spotLight = new THREE.SpotLight(0xFF0000, 1);
+        this.spotLight.position.set(7, 7, -20);
+        this.spotLight.intensity = 0.6;
+        this.spotLight.castShadow = true;
+        this.spotLight.shadow.bias = -0.0001;
+        this.spotLight.shadow.mapSize.width = 1024 * 8;
+        this.spotLight.shadow.mapSize.height = 1024 * 8;
+        this.scene.add(this.spotLight);
+
+        this.renderer.shadowMap.enabled = true;
+    }
+
+
+    /*
+    * Setup the camera
+    */
+    setupCamera() {
+        this.camera.position.z = 6.6;
+        this.camera.position.x = 11;
+        this.camera.position.y = 3;
+        this.camera.rotation.x = -1 / 8;
+        this.camera.rotation.y = 0.7;
+    }
+
+
+    /*
+    * Adds scene to the DOM
+    */
+    show() {
+        this.renderer.setSize(window.innerWidth, window.innerHeight)
+        document.body.appendChild(this.renderer.domElement)
+    }
+
+
+    fetchSee(path) {
+        return new Promise(function (resolve, reject) {
+
+            // Instantiate a loader
+            const loader = new THREE.GLTFLoader();
+
+            // Load a glTF resource
+            loader.load(
+                path,
+                resolve,
+                function (xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                },
+                function (error) {
+                    reject(error);
+                }
+            );
+        });
+    }
+
 }
 
 
-
-(async function () {
-
-
-    // Init the scene
-    const scene = new THREE.Scene()
-    const clock = new THREE.Clock();
-    const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 50)
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-
-    // Add scene to DOM
-    document.body.appendChild(renderer.domElement)
-
-    // Load the glTF model and add it to the scene
-    const see = await loadSee();
-    const model = see.scene.children[0];
-    scene.add(model);
-
-    // Set camera position
-    camera.position.z = 6.6
-    camera.position.x = 11
-    camera.position.y = 3
-    camera.rotation.x = -1 / 8
-    camera.rotation.y = 0.7
-
-    // Add hemisphere light
-    const hemiLight = new THREE.HemisphereLight(0xb1eeff, 0x080820, 4);
-    hemiLight.intensity = 0.1;
-    scene.add(hemiLight);
-
-    // Add spot light
-    const light = new THREE.SpotLight(0xFF0000, 1);
-    light.position.set(7, 7, -20);
-    light.intensity = 0.6;
-    light.castShadow = true;
-    light.shadow.bias = -0.0001;
-    light.shadow.mapSize.width = 1024 * 8;
-    light.shadow.mapSize.height = 1024 * 8;
-    scene.add(light);
-
-    // Setup lighting effects
-    let octopus;
-    let i = 0;
-    model.traverse(n => {
-        if (n.isMesh) {
-
-            // Enable shadows
-            n.castShadow = true;
-            n.receiveShadow = true;
-
-            if (i == 0) {
-                /*const glow = new THREE.PointLight(0xff5c5c, 1, 100);
-                glow.position.set(7.75, 6.5, -10.8);
-                glow.intensity = 0.7;
-                glow.castShadow = true;
-                glow.shadow.bias = -0.0001;
-                glow.shadow.mapSize.width = 1024 * 8;
-                glow.shadow.mapSize.height = 1024 * 8;
-                scene.add(glow);*/
-                //const pointLightHelper = new THREE.PointLightHelper(glow, 1);
-                //scene.add(pointLightHelper);
-                n.material = new THREE.MeshPhongMaterial({
-                    color: 0xC2B280,
-                    specular: 0x050505,
-                    shininess: 100
-                });
-            }
-
-            // Octupus glow
-            if (i == 527) {
-                octopus = n;
-                octopus.material = new THREE.MeshLambertMaterial({
-                    color: 0xFF0000,
-                    emissive: 0xFF0000,
-                    emissiveIntensity: 8
-                });
-            }
-
-            // Hide sky box
-            if (i++ == 1) {
-                n.visible = false;
-                return;
-            }
-
-            // Add anisotropy
-            if (n.material.map)
-                n.material.map.anisotropy = 16;
-        }
-    });
-    renderer.shadowMap.enabled = true;
-
-    // Adding fog
-    const fogColor = new THREE.Color(0x160c84);
-    scene.background = fogColor;
-    scene.fog = new THREE.Fog(fogColor, -2, 19);
-
-    // Add bloom effect
-    var renderPass = new THREE.RenderPass(scene, camera);
-    var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-    effectCopy.renderToScreen = true;
-
-    var bloomPass = new THREE.BloomPass(1.7, 15, 5.0, 32);
-    var composer = new THREE.EffectComposer(renderer);
-    composer.addPass(renderPass);
-    composer.addPass(bloomPass);
-    composer.addPass(effectCopy);
-    /*
-        const bloom = new THREE.BloomPass(1, 1);
-        bloom.renderToScreen = true;
-        const composer = new THREE.EffectComposer(renderer);
-        composer.addPass(bloom);
-        composer.addPass(new THREE.RenderPass(scene, camera));
-        composer.addPass(new THREE.ShaderPass(THREE.CopyShader));
-        renderer.autoClear = false;
-        renderer.setClearColor(0x000000, 0);*/
-
-
-
-
-    // Scene Animation
-    const octoOffset = octopus.position.y;
-    const cameraOffset = camera.rotation.x;
-    let time = 0;
-    const animate = function () {
-
-        // Move camera
-        camera.rotation.x = cameraOffset + Math.sin(time / 1.5) * 0.02;
-        octopus.position.y = octoOffset + Math.sin(time / 2) / 6;
-
-        // Render the scene
-        //renderer.render(scene, camera);
-        renderer.autoClear = false;
-        renderer.clear();
-        const dT = clock.getDelta();
-        composer.render(dT);
-        time += dT;
-
-        requestAnimationFrame(animate);
-    }
-
-    animate();
-
-})();
-
-
-
-
-
-
-
-
-
+new See();
