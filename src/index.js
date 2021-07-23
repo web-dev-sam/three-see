@@ -8,7 +8,8 @@ import {
     SpotLight,
     HemisphereLight,
     MeshLambertMaterial,
-    MeshPhongMaterial
+    MeshPhongMaterial,
+    sRGBEncoding
 } from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -16,6 +17,8 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass.js';
 import { CopyShader } from 'three/examples/jsm/shaders/CopyShader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { VignetteShader } from 'three/examples/jsm/shaders/VignetteShader';
+
 
 class See {
 
@@ -61,7 +64,8 @@ class See {
     */
     firstFrameSetup() {
         this.octoOffset = this.octopus.position.y;
-        this.cameraOffset = this.camera.rotation.x;
+        this.cameraOffsetX = this.camera.rotation.x;
+        this.cameraOffsetY = this.camera.rotation.y;
     }
 
 
@@ -76,7 +80,8 @@ class See {
         }
 
         // Move camera
-        this.camera.rotation.x = this.cameraOffset + Math.sin(this.time / 1.5) * 0.02;
+        this.camera.rotation.x = this.cameraOffsetX + Math.sin(this.time / 1.5) * 0.02 - this.mouse.y / 8;
+        this.camera.rotation.y = this.cameraOffsetY - this.mouse.x / 8;
         this.octopus.position.y = this.octoOffset + Math.sin(this.time / 2) / 6;
 
         // Clear the scene and render it
@@ -102,14 +107,18 @@ class See {
         // Setup shader passes and composer
         const renderPass = new RenderPass(this.scene, this.camera);
         const effectCopy = new ShaderPass(CopyShader);
-        const bloomPass = new BloomPass(1.7, 15, 5.0, 32);
+        const vignetteShader = new ShaderPass(VignetteShader);
+        const bloomPass = new BloomPass(1, 15, 5.0, 256);
         this.composer = new EffectComposer(this.renderer);
         effectCopy.renderToScreen = true;
+
 
         // Add bloom effect
         this.composer.addPass(renderPass);
         this.composer.addPass(bloomPass);
+        this.composer.addPass(vignetteShader);
         this.composer.addPass(effectCopy);
+        //this.composer.addPass(effectCopy);
     }
 
 
@@ -134,6 +143,9 @@ class See {
         let i = 0;
         this.seeModel.traverse(n => {
             if (n.isMesh) {
+                n.material.encoding = sRGBEncoding;
+                n.material.needsUpdate = true;
+                console.log(n);
 
                 // Enable shadows
                 n.castShadow = true;
@@ -201,7 +213,7 @@ class See {
 
         // Add backgroud spot light
         this.spotLight = new SpotLight(0xFF0000, 1);
-        this.spotLight.position.set(7, 7, -20);
+        this.spotLight.position.set(6.5, 6, -20);
         this.spotLight.intensity = 0.6;
         this.spotLight.castShadow = true;
         this.spotLight.shadow.bias = -0.0001;
@@ -230,6 +242,26 @@ class See {
     */
     show() {
         this.renderer.setSize(window.innerWidth, window.innerHeight)
+
+        // Resize canvas when window is resized
+        window.addEventListener('resize', () => {
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+        });
+
+        // Record mouse movement
+        this.mouse = {
+            x: 0,
+            y: 0
+        };
+        this.renderer.domElement.addEventListener('mousemove', e => {
+            this.mouse = {
+                x: e.clientX / window.innerWidth - 0.5,
+                y: e.clientY / window.innerHeight - 0.5
+            };
+        });
+
         document.body.appendChild(this.renderer.domElement)
     }
 
