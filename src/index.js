@@ -32,6 +32,7 @@ class See {
         this.clock = new Clock();
         this.camera = new PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 40);
         this.renderer = new WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight)
         this.see = await this.fetchSee('models/see.gltf');
         this.time = 0;
         this.frame = 0;
@@ -80,8 +81,10 @@ class See {
         }
 
         // Move camera
-        this.camera.rotation.x = this.cameraOffsetX + Math.sin(this.time / 1.5) * 0.02 - this.mouse.y / 8;
-        this.camera.rotation.y = this.cameraOffsetY - this.mouse.x / 8;
+        this.camera.rotation.x = this.cameraOffsetX + Math.sin(this.time / 1.5) * 0.02 - this.vmouse.y / 8;
+        this.camera.rotation.y = this.cameraOffsetY - this.vmouse.x / 8;
+        this.camera.fov = 100 + Math.sin(this.time * 0.1) * 5;
+        this.camera.updateProjectionMatrix();
         this.octopus.position.y = this.octoOffset + Math.sin(this.time / 2) / 6;
 
         // Clear the scene and render it
@@ -145,7 +148,6 @@ class See {
             if (n.isMesh) {
                 n.material.encoding = sRGBEncoding;
                 n.material.needsUpdate = true;
-                console.log(n);
 
                 // Enable shadows
                 n.castShadow = true;
@@ -255,11 +257,19 @@ class See {
             x: 0,
             y: 0
         };
+        this.vmouse = {
+            x: 0,
+            y: 0
+        };
+        let o = 0;
         this.renderer.domElement.addEventListener('mousemove', e => {
-            this.mouse = {
-                x: e.clientX / window.innerWidth - 0.5,
-                y: e.clientY / window.innerHeight - 0.5
-            };
+            if (o % 20 == 0) {
+                this.mouse.x = e.clientX / window.innerWidth - 0.5;
+                this.mouse.y = e.clientY / window.innerHeight - 0.5;
+            }
+            this.vmouse.x += (this.mouse.x - this.vmouse.x) / 200;
+            this.vmouse.y += (this.mouse.y - this.vmouse.y) / 200;
+            o++;
         });
 
         document.body.appendChild(this.renderer.domElement)
