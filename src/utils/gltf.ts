@@ -75,7 +75,7 @@ export function useModel({ onSuccess }: { onSuccess?: (model: Group) => void } =
               const fogAwareGlowMaterial = new ShaderMaterial({
                 uniforms: {
                   color: { value: new Color(0xFF3010) },
-                  emissiveIntensity: { value: 4.0 }, // Higher for better bloom pickup
+                  emissiveIntensity: { value: 2.4 }, // Higher for better bloom pickup
                   fogColor: { value: fogColor },
                   fogNear: { value: -2 },
                   fogFar: { value: 19 },

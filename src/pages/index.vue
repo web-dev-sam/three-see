@@ -103,7 +103,7 @@ function init() {
   composer.addPass(renderPass)
 
   // Lights
-  const hemisphereLight = new HemisphereLight(0xB1EEFF, 0x080820, 0.1)
+  const hemisphereLight = new HemisphereLight(0xFFCCBB, 0x080820, 0.1)
   scene.add(hemisphereLight)
 
   const spotLight = new SpotLight(0xF55932, 60)
