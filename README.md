@@ -14,7 +14,7 @@
     <h2>Development</h2>
 </div>
 
-* Run `npm install`
-* Run `npm run dev` in another terminal session
+* `npm install`
+* `npm run dev`
 
 <br>&nbsp;<br>
