@@ -1,39 +1,20 @@
-# three-see
+<br>&nbsp;<br>
+<div align="center">
+    <a href="https://see.webry.com/">
+        <img src="https://raw.githubusercontent.com/web-dev-sam/three-see/main/images/preview.png" width="512" style="border-radius: 15px;">
+    </a>
+    <h2>Three Sea</h2>
+    <p align="center">
+        <p>A 3D Demo Sea Scene made using three.js with lighting and postprocessing effects</p>
+    </p>
+</div>
+<br>&nbsp;<br>
 
-This template should help get you started developing with Vue 3 in Vite.
+<div align="center">
+    <h2>Development</h2>
+</div>
 
-## Recommended IDE Setup
+* Run `npm install`
+* Run `npm run dev` in another terminal session
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-pnpm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-pnpm dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-pnpm build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-pnpm lint
-```
+<br>&nbsp;<br>
