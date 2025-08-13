@@ -1,8 +1,7 @@
-
 <br>&nbsp;<br>
 <div align="center">
     <a href="https://sea.webry.com/">
-        <img src="https://raw.githubusercontent.com/MindLaborDev/three-sea/main/images/preview.png" width="512" style="border-radius: 15px;">
+        <img src="https://raw.githubusercontent.com/web-dev-sam/three-sea/main/images/preview.png" width="512" style="border-radius: 15px;">
     </a>
     <h2>Three Sea</h2>
     <p align="center">
@@ -15,10 +14,7 @@
     <h2>Development</h2>
 </div>
 
-
-* Run `npm install`
-* Run `cd dist && http-server` (assuming that you have installed http-server)
-* Run `npx webpack --watch` in another terminal session
-
+* `npm install`
+* `npm run dev`
 
 <br>&nbsp;<br>

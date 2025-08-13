@@ -1,30 +1,49 @@
 {
   "name": "three-sea",
-  "version": "1.0.0",
-  "description": "A see scene rendered with threejs",
-  "main": "index.js",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MindLaborDev/three-sea.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/MindLaborDev/three-sea/issues"
-  },
-  "homepage": "https://github.com/MindLaborDev/three-sea#readme",
-  "devDependencies": {
-    "webpack": "^5.46.0",
-    "webpack-cli": "^4.7.2",
-    "@babel/core": "^7.14.8",
-    "babel": "^6.23.0",
-    "babel-loader": "^8.2.2"
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "lint:oxlint": "oxlint . --fix -D correctness --ignore-path .gitignore",
+    "lint:eslint": "eslint . --fix",
+    "lint": "run-s lint:*"
   },
   "dependencies": {
-    "three": "^0.130.1"
+    "@tailwindcss/vite": "^4.1.11",
+    "@tresjs/cientos": "^4.3.1",
+    "@tresjs/core": "^4.3.6",
+    "@tresjs/post-processing": "^2.4.0",
+    "@vueuse/core": "^13.6.0",
+    "tailwindcss": "^4.1.11",
+    "three": "^0.179.1",
+    "vue": "^3.5.18",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^5.2.0",
+    "@tsconfig/node22": "^22.0.2",
+    "@types/node": "^22.16.5",
+    "@types/three": "^0.179.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/eslint-config-typescript": "^14.6.0",
+    "@vue/tsconfig": "^0.7.0",
+    "eslint": "^9.31.0",
+    "eslint-plugin-oxlint": "~1.8.0",
+    "eslint-plugin-vue": "~10.3.0",
+    "jiti": "^2.4.2",
+    "npm-run-all2": "^8.0.4",
+    "oxlint": "~1.8.0",
+    "typescript": "~5.8.0",
+    "vite": "^7.0.6",
+    "vite-plugin-vue-devtools": "^8.0.0",
+    "vue-tsc": "^3.0.4"
   }
 }
