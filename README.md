@@ -1,8 +1,8 @@
 
 <br>&nbsp;<br>
 <div align="center">
-    <a href="https://three-see.vercel.app/">
-        <img src="https://raw.githubusercontent.com/MindLaborDev/three-see/main/images/preview.png" width="512" style="border-radius: 15px;">
+    <a href="https://sea.webry.com/">
+        <img src="https://raw.githubusercontent.com/MindLaborDev/three-sea/main/images/preview.png" width="512" style="border-radius: 15px;">
     </a>
     <h2>Three Sea</h2>
     <p align="center">
